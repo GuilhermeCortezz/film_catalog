@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Film Catalog",
+    "slug": "film-catalog",
+    "version": "1.0.0",
+    "scheme": "filmcatalog",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.filmcatalog.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.filmcatalog.app"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "db2dcac5-e202-4b53-9013-eca4c9be7596"
+      }
+    }
+  }
+}
