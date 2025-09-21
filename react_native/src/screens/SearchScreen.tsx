@@ -116,35 +116,37 @@ export default function SearchScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
-          <Ionicons 
-            name="search-outline" 
-            size={20} 
-            color={Colors.textTertiary} 
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Buscar filmes..."
-            placeholderTextColor={Colors.textTertiary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            autoCapitalize="none"
-            autoCorrect={false}
-            returnKeyType="search"
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity
-              onPress={() => setSearchQuery('')}
-              style={styles.clearButton}
-            >
-              <Ionicons 
-                name="close-circle" 
-                size={20} 
-                color={Colors.textTertiary} 
-              />
-            </TouchableOpacity>
-          )}
+      <View style={styles.header}>
+        <View style={styles.searchContainer}>
+          <View style={styles.searchInputContainer}>
+            <Ionicons 
+              name="search-outline" 
+              size={20} 
+              color={Colors.textTertiary} 
+            />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Buscar filmes..."
+              placeholderTextColor={Colors.textTertiary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="search"
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity
+                onPress={() => setSearchQuery('')}
+                style={styles.clearButton}
+              >
+                <Ionicons 
+                  name="close-circle" 
+                  size={20} 
+                  color={Colors.textTertiary} 
+                />
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </View>
 
@@ -183,12 +185,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  searchContainer: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+  header: {
     backgroundColor: Colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: Colors.surfaceLight,
+  },
+  searchContainer: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
   },
   searchInputContainer: {
     flexDirection: 'row',

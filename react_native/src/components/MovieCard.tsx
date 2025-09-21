@@ -12,12 +12,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { Movie } from '../types/movie';
 import { tmdbService } from '../services/tmdbService';
 import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../constants/theme';
+import { useMovieStorage } from '../hooks/useMovieStorage';
 
 interface MovieCardProps {
   movie: Movie;
   onPress?: (movie: Movie) => void;
   size?: 'small' | 'medium' | 'large';
   showDetails?: boolean;
+  showActions?: boolean;
 }
 
 const { width } = Dimensions.get('window');
@@ -26,8 +28,10 @@ export default function MovieCard({
   movie, 
   onPress, 
   size = 'medium',
-  showDetails = true 
+  showDetails = true,
+  showActions = false
 }: MovieCardProps) {
+  const { hasStatus, toggleStatus } = useMovieStorage(movie.id);
   const cardSizes = {
     small: { width: width * 0.3, height: width * 0.45 },
     medium: { width: width * 0.4, height: width * 0.6 },
@@ -38,6 +42,21 @@ export default function MovieCard({
 
   const handlePress = () => {
     onPress?.(movie);
+  };
+
+  const handleFavoritePress = async (e: any) => {
+    e.stopPropagation();
+    await toggleStatus(movie, 'favorite');
+  };
+
+  const handleWatchedPress = async (e: any) => {
+    e.stopPropagation();
+    await toggleStatus(movie, 'watched');
+  };
+
+  const handleWatchlistPress = async (e: any) => {
+    e.stopPropagation();
+    await toggleStatus(movie, 'watchlist');
   };
 
   return (
@@ -66,7 +85,7 @@ export default function MovieCard({
         <View style={styles.ratingBadge}>
           <Ionicons name="star" size={12} color={Colors.rating} />
           <Text style={styles.ratingText}>
-            {movie.vote_average.toFixed(1)}
+            {movie.vote_average?.toFixed(1) || 'N/A'}
           </Text>
         </View>
         
@@ -75,20 +94,58 @@ export default function MovieCard({
           colors={['transparent', Colors.overlayDark]}
           style={styles.gradient}
         />
+
+        {/* Action Buttons */}
+        {showActions && (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.actionButton, hasStatus('favorite') && styles.actionButtonActive]}
+              onPress={handleFavoritePress}
+            >
+              <Ionicons
+                name={hasStatus('favorite') ? 'heart' : 'heart-outline'}
+                size={20}
+                color={hasStatus('favorite') ? Colors.error : Colors.textPrimary}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, hasStatus('watched') && styles.actionButtonActive]}
+              onPress={handleWatchedPress}
+            >
+              <Ionicons
+                name={hasStatus('watched') ? 'checkmark-circle' : 'checkmark-circle-outline'}
+                size={20}
+                color={hasStatus('watched') ? Colors.success : Colors.textPrimary}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, hasStatus('watchlist') && styles.actionButtonActive]}
+              onPress={handleWatchlistPress}
+            >
+              <Ionicons
+                name={hasStatus('watchlist') ? 'bookmark' : 'bookmark-outline'}
+                size={20}
+                color={hasStatus('watchlist') ? Colors.secondary : Colors.textPrimary}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       {/* Movie Details */}
       {showDetails && (
         <View style={styles.details}>
           <Text style={styles.title} numberOfLines={2}>
-            {movie.title}
+            {movie.title || 'Título não disponível'}
           </Text>
           
           <Text style={styles.releaseDate}>
-            {tmdbService.formatBrazilianDate(movie.release_date)}
+            {movie.release_date ? tmdbService.formatBrazilianDate(movie.release_date) : 'Data não informada'}
           </Text>
           
-          {size === 'large' && (
+          {size === 'large' && movie.overview && (
             <Text style={styles.overview} numberOfLines={3}>
               {movie.overview}
             </Text>
@@ -165,5 +222,24 @@ const styles = StyleSheet.create({
     fontSize: Typography.sm,
     lineHeight: Typography.lineHeight.normal * Typography.sm,
     marginTop: Spacing.xs,
+  },
+  actionButtons: {
+    position: 'absolute',
+    top: Spacing.sm,
+    left: Spacing.sm,
+    flexDirection: 'column',
+    gap: Spacing.xs,
+  },
+  actionButton: {
+    backgroundColor: Colors.overlay,
+    borderRadius: BorderRadius.sm,
+    padding: Spacing.xs,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 32,
+    height: 32,
+  },
+  actionButtonActive: {
+    backgroundColor: Colors.secondary + '40',
   },
 });

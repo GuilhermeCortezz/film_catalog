@@ -3,12 +3,15 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Screens
 import HomeScreen from '../screens/HomeScreen';
 import SearchScreen from '../screens/SearchScreen';
 import MovieDetailsScreen from '../screens/MovieDetailsScreen';
 import SectionScreen from '../screens/SectionScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import CategoriesScreen from '../screens/CategoriesScreen';
 
 // Theme
 import { Colors, Typography } from '../constants/theme';
@@ -23,12 +26,15 @@ export type RootStackParamList = {
     title: string; 
     endpoint: 'popular' | 'top_rated' | 'now_playing' | 'upcoming';
   };
+  Categories: {
+    genreId?: number;
+    genreName?: string;
+  };
 };
 
 export type TabParamList = {
   Home: undefined;
   Search: undefined;
-  Favorites: undefined;
   Profile: undefined;
 };
 
@@ -37,8 +43,9 @@ const Tab = createBottomTabNavigator<TabParamList>();
 
 function TabNavigator() {
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap;
 
@@ -48,9 +55,6 @@ function TabNavigator() {
               break;
             case 'Search':
               iconName = focused ? 'search' : 'search-outline';
-              break;
-            case 'Favorites':
-              iconName = focused ? 'heart' : 'heart-outline';
               break;
             case 'Profile':
               iconName = focused ? 'person' : 'person-outline';
@@ -89,16 +93,12 @@ function TabNavigator() {
         options={{ tabBarLabel: 'Buscar' }}
       />
       <Tab.Screen 
-        name="Favorites" 
-        component={HomeScreen} // Placeholder for now
-        options={{ tabBarLabel: 'Favoritos' }}
-      />
-      <Tab.Screen 
         name="Profile" 
-        component={HomeScreen} // Placeholder for now
+        component={ProfileScreen}
         options={{ tabBarLabel: 'Perfil' }}
       />
     </Tab.Navigator>
+    </SafeAreaView>
   );
 }
 
@@ -142,6 +142,14 @@ export default function AppNavigator() {
           options={({ route }) => ({ 
             title: route.params.title,
           })}
+        />
+        <Stack.Screen 
+          name="Categories" 
+          component={CategoriesScreen}
+          options={{ 
+            title: 'Categorias',
+            headerShown: false,
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>

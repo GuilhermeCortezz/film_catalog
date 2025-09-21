@@ -67,7 +67,6 @@ export default function HomeScreen() {
 
   const loadAllSections = async () => {
     try {
-      console.log('🏠 Loading home sections...');
       
       const sectionPromises = [
         loadMovieSection('Populares', 'popular', () => tmdbService.getPopularMovies(1)),
@@ -78,7 +77,6 @@ export default function HomeScreen() {
 
       const newSections = await Promise.all(sectionPromises);
       setSections(newSections);
-      console.log('✅ All sections loaded');
     } catch (error) {
       console.error('❌ Error loading sections:', error);
       Alert.alert('Erro', 'Não foi possível carregar os filmes. Verifique sua conexão.');
@@ -145,6 +143,18 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Catálogo de Filmes</Text>
         <Text style={styles.headerSubtitle}>Descubra os melhores filmes</Text>
+      </View>
+
+      {/* Categories Button */}
+      <View style={styles.categoriesSection}>
+        <TouchableOpacity 
+          style={styles.categoriesButton}
+          onPress={() => navigation.navigate('Categories', {})}
+        >
+          <Ionicons name="grid-outline" size={20} color={Colors.textPrimary} />
+          <Text style={styles.categoriesButtonText}>Explorar por Categorias</Text>
+          <Ionicons name="chevron-forward" size={16} color={Colors.textSecondary} />
+        </TouchableOpacity>
       </View>
 
       {/* Content */}
@@ -226,6 +236,31 @@ const styles = StyleSheet.create({
   },
   movieCard: {
     width: 140,
-    marginHorizontal: Spacing.xs,
+    marginHorizontal: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  categoriesSection: {
+    backgroundColor: Colors.surface,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.surfaceLight,
+  },
+  categoriesButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.surfaceLight,
+  },
+  categoriesButtonText: {
+    flex: 1,
+    fontSize: Typography.md,
+    fontWeight: Typography.medium,
+    color: Colors.textPrimary,
+    marginLeft: Spacing.sm,
   },
 });

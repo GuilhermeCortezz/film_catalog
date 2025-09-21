@@ -5,7 +5,13 @@
     "version": "1.0.0",
     "scheme": "filmcatalog",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/icone.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/icone.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a1a"
+    },
     "platforms": [
       "ios",
       "android"
@@ -15,18 +21,32 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.filmcatalog.app"
+      "bundleIdentifier": "com.filmcatalog.app",
+      "infoPlist": {
+        "NSCalendarsUsageDescription": "Este app precisa acessar seu calendário para criar lembretes de filmes agendados."
+      }
     },
     "android": {
+      "icon": "./assets/icone.png",
       "adaptiveIcon": {
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/icone.png",
+        "backgroundColor": "#1a1a1a"
       },
-      "package": "com.filmcatalog.app"
+      "package": "com.filmcatalog.app",
+      "permissions": [
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR"
+      ],
+      "requestLegacyExternalStorage": true
     },
     "extra": {
       "eas": {
         "projectId": "db2dcac5-e202-4b53-9013-eca4c9be7596"
       }
-    }
+    },
+    "plugins": [
+      "expo-font",
+      "expo-calendar"
+    ]
   }
 }

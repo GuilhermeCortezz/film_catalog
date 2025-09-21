@@ -39,8 +39,6 @@ class TMDBService {
     const queryString = this.buildQueryString(defaultParams);
     const url = `${API_BASE_URL}${endpoint}${queryString ? `?${queryString}` : ''}`;
     
-    console.log('🔗 API Request:', url);
-    
     try {
       const response = await fetch(url, {
         method: 'GET',
@@ -52,7 +50,6 @@ class TMDBService {
       }
 
       const data = await response.json();
-      console.log('✅ API Response received');
       return data;
     } catch (error) {
       console.error('❌ API Error:', error);
