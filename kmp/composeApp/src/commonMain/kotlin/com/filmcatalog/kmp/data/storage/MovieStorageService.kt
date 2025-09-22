@@ -53,8 +53,48 @@ class PersistentMovieStorageService(private val settings: Settings) : MovieStora
             val moviesList = json.decodeFromString<List<StoredMovie>>(moviesJson)
             moviesList.associateBy { it.id }.toMutableMap()
         } catch (e: Exception) {
-            println("Error deserializing movies: ${e.message}")
-            mutableMapOf()
+            println("Error deserializing movies, trying migration: ${e.message}")
+            // Try to migrate from old format
+            try {
+                @Serializable
+                data class OldStoredMovie(
+                    val id: Int,
+                    val title: String,
+                    val posterPath: String,
+                    val releaseDate: String,
+                    val voteAverage: Double,
+                    val overview: String,
+                    val backdropPath: String? = null,
+                    val status: MovieStatus,
+                    val addedAt: Long = System.currentTimeMillis(),
+                    val scheduledDate: Long? = null
+                )
+                
+                val oldMoviesList = json.decodeFromString<List<OldStoredMovie>>(moviesJson)
+                val migratedMovies = oldMoviesList.map { oldMovie ->
+                    StoredMovie(
+                        id = oldMovie.id,
+                        title = oldMovie.title,
+                        posterPath = oldMovie.posterPath,
+                        releaseDate = oldMovie.releaseDate,
+                        voteAverage = oldMovie.voteAverage,
+                        overview = oldMovie.overview,
+                        backdropPath = oldMovie.backdropPath,
+                        statuses = setOf(oldMovie.status),
+                        addedAt = oldMovie.addedAt,
+                        scheduledDate = oldMovie.scheduledDate
+                    )
+                }
+                
+                // Save migrated data
+                val migratedMap = migratedMovies.associateBy { it.id }.toMutableMap()
+                saveStoredMovies(migratedMap)
+                println("Successfully migrated ${migratedMovies.size} movies to new format")
+                migratedMap
+            } catch (migrationError: Exception) {
+                println("Migration failed: ${migrationError.message}")
+                mutableMapOf()
+            }
         }
     }
     
@@ -76,77 +116,147 @@ class PersistentMovieStorageService(private val settings: Settings) : MovieStora
             voteAverage = voteAverage,
             overview = overview,
             backdropPath = backdropPath,
-            status = status,
+            statuses = setOf(status),
             scheduledDate = scheduledDate
         )
     }
     
+    private fun Movie.toStoredMovieWithStatuses(statuses: Set<MovieStatus>, scheduledDate: Long? = null): StoredMovie {
+        return StoredMovie(
+            id = id,
+            title = title,
+            posterPath = posterPath ?: "",
+            releaseDate = releaseDate,
+            voteAverage = voteAverage,
+            overview = overview,
+            backdropPath = backdropPath,
+            statuses = statuses,
+            scheduledDate = scheduledDate
+        )
+    }
+
     override suspend fun addToFavorites(movie: Movie) {
         val movies = getStoredMovies()
-        movies[movie.id] = movie.toStoredMovie(MovieStatus.FAVORITE)
+        val existingMovie = movies[movie.id]
+        if (existingMovie != null) {
+            val newStatuses = existingMovie.statuses + MovieStatus.FAVORITE
+            movies[movie.id] = existingMovie.copy(statuses = newStatuses)
+        } else {
+            movies[movie.id] = movie.toStoredMovie(MovieStatus.FAVORITE)
+        }
         saveStoredMovies(movies)
     }
-    
+
     override suspend fun removeFromFavorites(movie: Movie) {
         val movies = getStoredMovies()
-        movies.remove(movie.id)
-        saveStoredMovies(movies)
+        val existingMovie = movies[movie.id]
+        if (existingMovie != null) {
+            val newStatuses = existingMovie.statuses - MovieStatus.FAVORITE
+            if (newStatuses.isEmpty()) {
+                movies.remove(movie.id)
+            } else {
+                movies[movie.id] = existingMovie.copy(statuses = newStatuses)
+            }
+            saveStoredMovies(movies)
+        }
     }
-    
+
     override suspend fun addToWatched(movie: Movie) {
         val movies = getStoredMovies()
-        movies[movie.id] = movie.toStoredMovie(MovieStatus.WATCHED)
+        val existingMovie = movies[movie.id]
+        if (existingMovie != null) {
+            val newStatuses = existingMovie.statuses + MovieStatus.WATCHED
+            movies[movie.id] = existingMovie.copy(statuses = newStatuses)
+        } else {
+            movies[movie.id] = movie.toStoredMovie(MovieStatus.WATCHED)
+        }
         saveStoredMovies(movies)
     }
-    
+
     override suspend fun removeFromWatched(movie: Movie) {
         val movies = getStoredMovies()
-        movies.remove(movie.id)
-        saveStoredMovies(movies)
+        val existingMovie = movies[movie.id]
+        if (existingMovie != null) {
+            val newStatuses = existingMovie.statuses - MovieStatus.WATCHED
+            if (newStatuses.isEmpty()) {
+                movies.remove(movie.id)
+            } else {
+                movies[movie.id] = existingMovie.copy(statuses = newStatuses)
+            }
+            saveStoredMovies(movies)
+        }
     }
-    
+
     override suspend fun addToWatchlist(movie: Movie) {
         val movies = getStoredMovies()
-        movies[movie.id] = movie.toStoredMovie(MovieStatus.WATCHLIST)
+        val existingMovie = movies[movie.id]
+        if (existingMovie != null) {
+            val newStatuses = existingMovie.statuses + MovieStatus.WATCHLIST
+            movies[movie.id] = existingMovie.copy(statuses = newStatuses)
+        } else {
+            movies[movie.id] = movie.toStoredMovie(MovieStatus.WATCHLIST)
+        }
         saveStoredMovies(movies)
     }
-    
+
     override suspend fun removeFromWatchlist(movie: Movie) {
         val movies = getStoredMovies()
-        movies.remove(movie.id)
-        saveStoredMovies(movies)
+        val existingMovie = movies[movie.id]
+        if (existingMovie != null) {
+            val newStatuses = existingMovie.statuses - MovieStatus.WATCHLIST
+            if (newStatuses.isEmpty()) {
+                movies.remove(movie.id)
+            } else {
+                movies[movie.id] = existingMovie.copy(statuses = newStatuses)
+            }
+            saveStoredMovies(movies)
+        }
     }
-    
+
     override suspend fun scheduleMovie(movie: Movie, scheduledDate: Long) {
         val movies = getStoredMovies()
-        movies[movie.id] = movie.toStoredMovie(MovieStatus.SCHEDULED, scheduledDate)
+        val existingMovie = movies[movie.id]
+        if (existingMovie != null) {
+            val newStatuses = existingMovie.statuses + MovieStatus.SCHEDULED
+            movies[movie.id] = existingMovie.copy(statuses = newStatuses, scheduledDate = scheduledDate)
+        } else {
+            movies[movie.id] = movie.toStoredMovie(MovieStatus.SCHEDULED, scheduledDate)
+        }
         saveStoredMovies(movies)
     }
-    
+
     override suspend fun removeFromScheduled(movie: Movie) {
         val movies = getStoredMovies()
-        movies.remove(movie.id)
-        saveStoredMovies(movies)
+        val existingMovie = movies[movie.id]
+        if (existingMovie != null) {
+            val newStatuses = existingMovie.statuses - MovieStatus.SCHEDULED
+            if (newStatuses.isEmpty()) {
+                movies.remove(movie.id)
+            } else {
+                movies[movie.id] = existingMovie.copy(statuses = newStatuses, scheduledDate = null)
+            }
+            saveStoredMovies(movies)
+        }
     }
     
     override suspend fun getFavorites(): List<Movie> {
         val movies = getStoredMovies()
-        return movies.values.filter { it.status == MovieStatus.FAVORITE }.map { it.toMovie() }
+        return movies.values.filter { MovieStatus.FAVORITE in it.statuses }.map { it.toMovie() }
     }
     
     override suspend fun getWatched(): List<Movie> {
         val movies = getStoredMovies()
-        return movies.values.filter { it.status == MovieStatus.WATCHED }.map { it.toMovie() }
+        return movies.values.filter { MovieStatus.WATCHED in it.statuses }.map { it.toMovie() }
     }
     
     override suspend fun getWatchlist(): List<Movie> {
         val movies = getStoredMovies()
-        return movies.values.filter { it.status == MovieStatus.WATCHLIST }.map { it.toMovie() }
+        return movies.values.filter { MovieStatus.WATCHLIST in it.statuses }.map { it.toMovie() }
     }
     
     override suspend fun getScheduled(): List<Movie> {
         val movies = getStoredMovies()
-        return movies.values.filter { it.status == MovieStatus.SCHEDULED }.map { it.toMovie() }
+        return movies.values.filter { MovieStatus.SCHEDULED in it.statuses }.map { it.toMovie() }
     }
     
     override suspend fun getMoviesByStatus(status: MovieStatus): List<Movie> {
@@ -160,47 +270,47 @@ class PersistentMovieStorageService(private val settings: Settings) : MovieStora
     
     override suspend fun isInFavorites(movieId: Int): Boolean {
         val movies = getStoredMovies()
-        return movies[movieId]?.status == MovieStatus.FAVORITE
+        return movies[movieId]?.let { MovieStatus.FAVORITE in it.statuses } ?: false
     }
     
     override suspend fun isWatched(movieId: Int): Boolean {
         val movies = getStoredMovies()
-        return movies[movieId]?.status == MovieStatus.WATCHED
+        return movies[movieId]?.let { MovieStatus.WATCHED in it.statuses } ?: false
     }
     
     override suspend fun isInWatchlist(movieId: Int): Boolean {
         val movies = getStoredMovies()
-        return movies[movieId]?.status == MovieStatus.WATCHLIST
+        return movies[movieId]?.let { MovieStatus.WATCHLIST in it.statuses } ?: false
     }
     
     override suspend fun isScheduled(movieId: Int): Boolean {
         val movies = getStoredMovies()
-        return movies[movieId]?.status == MovieStatus.SCHEDULED
+        return movies[movieId]?.let { MovieStatus.SCHEDULED in it.statuses } ?: false
     }
     
     override suspend fun getScheduledDateTime(movieId: Int): Long? {
         val movies = getStoredMovies()
-        return movies[movieId]?.takeIf { it.status == MovieStatus.SCHEDULED }?.scheduledDate
+        return movies[movieId]?.takeIf { MovieStatus.SCHEDULED in it.statuses }?.scheduledDate
     }
     
     override suspend fun getFavoritesCount(): Int {
         val movies = getStoredMovies()
-        return movies.values.count { it.status == MovieStatus.FAVORITE }
+        return movies.values.count { MovieStatus.FAVORITE in it.statuses }
     }
     
     override suspend fun getWatchedCount(): Int {
         val movies = getStoredMovies()
-        return movies.values.count { it.status == MovieStatus.WATCHED }
+        return movies.values.count { MovieStatus.WATCHED in it.statuses }
     }
     
     override suspend fun getWatchlistCount(): Int {
         val movies = getStoredMovies()
-        return movies.values.count { it.status == MovieStatus.WATCHLIST }
+        return movies.values.count { MovieStatus.WATCHLIST in it.statuses }
     }
     
     override suspend fun getScheduledCount(): Int {
         val movies = getStoredMovies()
-        return movies.values.count { it.status == MovieStatus.SCHEDULED }
+        return movies.values.count { MovieStatus.SCHEDULED in it.statuses }
     }
     
     override suspend fun clearAllData() {

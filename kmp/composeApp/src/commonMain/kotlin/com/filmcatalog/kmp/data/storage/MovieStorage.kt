@@ -20,7 +20,7 @@ data class StoredMovie(
     val voteAverage: Double,
     val overview: String,
     val backdropPath: String? = null,
-    val status: MovieStatus,
+    val statuses: Set<MovieStatus> = emptySet(),
     val addedAt: Long = System.currentTimeMillis(),
     val scheduledDate: Long? = null
 ) {
