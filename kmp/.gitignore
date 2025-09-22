@@ -1,0 +1,168 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Log Files
+*.log
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+.idea_modules/
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# Visual Studio Code
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Kotlin
+.kotlin/
+kotlin-js-store/
+
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# iOS
+*.xcworkspace/
+!default.xcworkspace/
+xcuserdata/
+*.moved-aside
+DerivedData/
+*.ipa
+*.xccheckout
+*.xcscmblueprint
+build/
+Pods/
+.symlinks/
+profile
+coverage
+.generated/
+
+# React Native (se aplicável)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.expo/
+.expo-shared/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services
+google-services.json
+GoogleService-Info.plist
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Bundle artifacts
+*.jsbundle
+
+# CocoaPods
+Pods/
+*.xcworkspace
+!default.xcworkspace
+
+# Accio dependency management
+Dependencies/
+.accio/
+
+# Code coverage
+*.gcov
+*.gcda
+*.gcno
+
+# Android lint
+lint-results.xml
+lint-results_files/
+
+# Android profiling
+*.hprof
+
+# JetBrains IDEs
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+.idea/**/modules.xml
+.idea/**/encodings.xml
+.idea/**/misc.xml
+.idea/**/vcs.xml
+.idea/**/jsLibraryMappings.xml
+
+# Gradle cache
+.gradle-cache/
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor directories and files
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+ehthumbs.db
+Thumbs.db
